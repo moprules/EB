@@ -1,2 +1,2 @@
 # EB
-Energy Иalance
+Energy Balance
