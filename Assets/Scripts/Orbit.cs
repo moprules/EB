@@ -6,7 +6,6 @@ public class Orbit : MonoBehaviour
 {
     [SerializeField] GameObject myTimer;
     // параметры орбиты
-    [SerializeField] GameObject myCenter;
     public float A = 1;
     public float B = 1;
     public float inclination = 0;
@@ -34,7 +33,7 @@ public class Orbit : MonoBehaviour
         float z1 = x1 * Mathf.Sin(inclinationAngle);
         x1 *= Mathf.Cos(inclinationAngle);
 
-        transform.position = myCenter.transform.position + new Vector3(x1, y1, z1);
+        transform.position = transform.parent.transform.position + new Vector3(x1, y1, z1);
     }
 
     private void OnValidate()
