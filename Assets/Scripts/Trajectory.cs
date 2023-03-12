@@ -17,14 +17,12 @@ public class Trajectory : MonoBehaviour
 
     void DrawCurrentTrajectory()
     {
-        if (myPositions.Count == 0 || !transform.position.Equals(myPositions[myPositions.Count - 1]))
+        Vector3 curPos = transform.parent.transform.position;
+        if (myPositions.Count == 0 || !curPos.Equals(myPositions[myPositions.Count - 1]))
         {
-            myPositions.Add(transform.parent.transform.position);
+            myPositions.Add(curPos);
+            lineRenderer.positionCount = myPositions.Count;
+            lineRenderer.SetPosition(myPositions.Count - 1, curPos);
         }
-
-        lineRenderer.positionCount = myPositions.Count;
-        lineRenderer.SetPositions(myPositions.ToArray());
     }
-
-
 }
