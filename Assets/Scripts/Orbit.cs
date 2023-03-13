@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 public class Orbit : MonoBehaviour
 {
@@ -52,19 +53,32 @@ public class Orbit : MonoBehaviour
         float z1 = x1 * Mathf.Sin(inclinationAngle);
         x1 *= Mathf.Cos(inclinationAngle);
 
-        return transform.parent.transform.position + new Vector3(x1, y1, z1);
+        Vector3 resPos = new Vector3(x1, y1, z1);
+
+        // Если у объекта есть родителский объект
+        if (transform.parent != null)
+        {
+            // то позиция строится относительно этого родителя
+            // Инача относительно начала координат
+            resPos += transform.parent.transform.position;
+        }
+
+        return resPos;
     }
 
     private void OnValidate()
     {
         // myCenter.transform.position = center;
         MyMove(0);
+        // Если объект является дочерним, скрываем поле
     }
 
     private void OnDrawGizmosSelected()
     {
-        // Показываем линию только при выборе объекта
-        // Рисуем линию до цели
+        if (!EditorApplication.isPlaying)
+        {
+            MyMove(0);
+        }
         Gizmos.color = Color.green;
         Vector3 before = MyPosition(0);
         for (int a = 1; a <= 360; a++)
