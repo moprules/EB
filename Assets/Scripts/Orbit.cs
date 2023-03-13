@@ -7,12 +7,10 @@ public class Orbit : MonoBehaviour
 {
     [SerializeField] GameObject myTimer;
     // параметры орбиты
-    public float A = 1;
-    public float B = 1;
-    public float inclination = 0;
-    public float startAngle = 0;
-    public float omega = 4 * Mathf.PI / 180 / 60f;
-
+    public float aphelion = 1;
+    public float perihelion = 1;
+    public float T = 5;
+    public float startTetaAngle = 0;
     List<Vector3> myPositions = new List<Vector3>();
     // Start is called before the first frame update
     void Start()
@@ -29,8 +27,12 @@ public class Orbit : MonoBehaviour
 
     void MyMove(float seconds)
     {
-        float orbitAngle = (startAngle * Mathf.PI / 180f + omega * seconds) % (2 * Mathf.PI);
-        transform.position = MyPosition(orbitAngle);
+
+        // Учитываем начально смещение в эквивалентных секундах
+        seconds += T * (180 + startTetaAngle / 360f);
+        // Вычисляем наше положение относительно времени витка
+        float curTetaAngle = (360f * (seconds % T) / T) % 360f;
+        transform.position = MyPosition(curTetaAngle);
     }
 
     void DrawCurrentTrajectory()
@@ -44,16 +46,16 @@ public class Orbit : MonoBehaviour
         }
     }
 
-    public Vector3 MyPosition(float orbitAngle)
+    public Vector3 MyPosition(float curTetaAngle)
     {
-        float inclinationAngle = (inclination * Mathf.PI / 180f) % (2 * Mathf.PI);
-        float x1 = A * Mathf.Cos(orbitAngle);
-        float y1 = B * Mathf.Sin(orbitAngle);
-        // Учитываем наклонение орбиты
-        float z1 = x1 * Mathf.Sin(inclinationAngle);
-        x1 *= Mathf.Cos(inclinationAngle);
+        curTetaAngle *= Mathf.PI / 180;
+        float e = (aphelion - perihelion) / (aphelion + perihelion);
+        float r = aphelion * (1 - e) / (1 - e * Mathf.Cos(curTetaAngle));
+        float x1 = -aphelion + perihelion + r * Mathf.Cos(curTetaAngle);
+        float y1 = r * Mathf.Sin(curTetaAngle);
 
-        Vector3 resPos = new Vector3(x1, y1, z1);
+        Vector3 resPos = transform.TransformDirection(new Vector3(x1, y1, 0));
+        // Vector3 resPos = new Vector3(x1, y1, 0);
 
         // Если у объекта есть родителский объект
         if (transform.parent != null)
@@ -68,9 +70,7 @@ public class Orbit : MonoBehaviour
 
     private void OnValidate()
     {
-        // myCenter.transform.position = center;
         MyMove(0);
-        // Если объект является дочерним, скрываем поле
     }
 
     private void OnDrawGizmosSelected()
@@ -87,5 +87,16 @@ public class Orbit : MonoBehaviour
             Gizmos.DrawLine(before, newPos);
             before = newPos;
         }
+
+        Vector3 centerPos = new Vector3(0, 0, 0);
+        // Если у объекта есть родителский объект
+        if (transform.parent != null)
+        {
+            // то позиция строится относительно этого родителя
+            // Инача относительно начала координат
+            centerPos += transform.parent.transform.position;
+        }
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(centerPos, 0.1f);
     }
 }
