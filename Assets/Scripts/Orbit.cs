@@ -6,6 +6,9 @@ using UnityEditor;
 public class Orbit : MonoBehaviour
 {
     [SerializeField] GameObject myTimer;
+    public Vector3 rotor = new Vector3(0, 0, 0);
+    [HideInInspector]
+    [SerializeField] Vector3 _rotor = new Vector3(0, 0, 0);
     // параметры орбиты
     public float aphelion = 1;
     public float perihelion = 1;
@@ -16,6 +19,7 @@ public class Orbit : MonoBehaviour
     void Start()
     {
         MyMove(0);
+
     }
     // Update is called once per frame
     void Update()
@@ -54,15 +58,15 @@ public class Orbit : MonoBehaviour
         float x1 = -aphelion + perihelion + r * Mathf.Cos(curTetaAngle);
         float y1 = r * Mathf.Sin(curTetaAngle);
 
-        Vector3 resPos = transform.TransformDirection(new Vector3(x1, y1, 0));
+
+
+        Vector3 resPos = new Vector3(x1, y1, 0);
         // Vector3 resPos = new Vector3(x1, y1, 0);
 
-        // Если у объекта есть родителский объект
         if (transform.parent != null)
         {
-            // то позиция строится относительно этого родителя
-            // Инача относительно начала координат
-            resPos += transform.parent.transform.position;
+            resPos += transform.InverseTransformDirection(transform.parent.transform.position);
+            resPos = transform.TransformDirection(resPos);
         }
 
         return resPos;
@@ -71,6 +75,36 @@ public class Orbit : MonoBehaviour
     private void OnValidate()
     {
         MyMove(0);
+
+        if (!_rotor.Equals(rotor))
+        {
+            Vector3 center = new Vector3(0, 0, 0);
+            if (transform.parent != null)
+            {
+                center = transform.parent.transform.position;
+            }
+            Vector3 axis;
+            float angle;
+            Vector3 rotAngle = rotor - _rotor;
+            if (rotAngle.x != 0f)
+            {
+                angle = rotAngle.x;
+                axis = transform.TransformDirection(new Vector3(1, 0, 0));
+            }
+            else if (rotAngle.y != 0f)
+            {
+                angle = rotAngle.y;
+                axis = transform.TransformDirection(new Vector3(0, 1, 0));
+            }
+            else
+            {
+                angle = rotAngle.z;
+                axis = transform.TransformDirection(new Vector3(0, 0, 1));
+            }
+            transform.RotateAround(center, axis, angle);
+            _rotor = rotor;
+        }
+        _rotor = rotor;
     }
 
     private void OnDrawGizmosSelected()
