@@ -24,7 +24,27 @@ public class Orbit : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float seconds = myTimer.GetComponent<MyTimer>().curTime;
+
+        Orbit parent = null;
+        if (transform.parent != null)
+        {
+            parent = transform.parent.GetComponent<Orbit>();
+        }
+        if (parent == null)
+        {
+            float seconds = myTimer.GetComponent<MyTimer>().curTime;
+            MyUpdate(seconds);
+
+            Orbit[] childs = GetComponentsInChildren<Orbit>();
+            foreach (Orbit c in childs)
+            {
+                c.MyUpdate(seconds);
+            }
+        }
+    }
+
+    void MyUpdate(float seconds)
+    {
         MyMove(seconds);
         DrawCurrentTrajectory();
     }
