@@ -15,6 +15,7 @@ public class Orbit : MonoBehaviour
     public float T = 5;
     public float startTetaAngle = 0;
     List<Vector3> myPositions = new List<Vector3>();
+    bool isCirce = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -51,22 +52,29 @@ public class Orbit : MonoBehaviour
 
     void MyMove(float seconds)
     {
-
         // Учитываем начально смещение в эквивалентных секундах
         seconds += T * (180 + startTetaAngle / 360f);
         // Вычисляем наше положение относительно времени витка
         float curTetaAngle = (360f * (seconds % T) / T) % 360f;
         transform.position = MyPosition(curTetaAngle);
+
     }
 
     void DrawCurrentTrajectory()
     {
-        LineRenderer lineRenderer = GetComponent<LineRenderer>();
-        if (myPositions.Count == 0 || !transform.position.Equals(myPositions[myPositions.Count - 1]))
+        if (!isCirce)
         {
-            myPositions.Add(transform.position);
-            lineRenderer.positionCount = myPositions.Count;
-            lineRenderer.SetPosition(myPositions.Count - 1, transform.position);
+            LineRenderer lineRenderer = GetComponent<LineRenderer>();
+            if (myPositions.Count == 0 || !transform.position.Equals(myPositions[myPositions.Count - 1]))
+            {
+                myPositions.Add(transform.position);
+                lineRenderer.positionCount = myPositions.Count;
+                lineRenderer.SetPosition(myPositions.Count - 1, transform.position);
+                if (myPositions.Count > (T / Time.deltaTime) && Vector3.Distance(myPositions[0], transform.position) <= 0.1)
+                {
+                    isCirce = true;
+                }
+            }
         }
     }
 
